@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Panel Admin Lisensi Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #005a31 0%, #00816d 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-online {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+        
+        .status-offline {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Connection Status -->
+    <div class="connection-status">
+        <div id="connectionStatus" class="status-badge status-offline">
+            <i class="bi bi-wifi-off"></i>
+            <span>OFFLINE</span>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;"></div>
+            <div id="loadingText">Memuat...</div>
+        </div>
+    </div>
+    
+    <div class="admin-container">
+        <div class="admin-card">
+            <!-- Header -->
+            <div class="admin-header">
+                <h1><i class="bi bi-shield-lock me-2"></i>PANEL ADMIN ONLINE</h1>
+                <p class="mb-0">Kelola lisensi secara real-time dengan spreadsheet</p>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-4">
+                <!-- Quick Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <h4 id="totalLicenses">0</h4>
+                                <p class="mb-0">Total Lisensi</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body text-center">
+                                <h4 id="activeLicenses">0</h4>
+                                <p class="mb-0">Aktif</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body text-center">
+                                <h4 id="pendingLicenses">0</h4>
+                                <p class="mb-0">Pending</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body text-center">
+                                <h4 id="usedLicenses">0</h4>
+                                <p class="mb-0">Terpakai</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button id="refreshBtn" class="btn btn-primary">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                            </button>
+                            <button id="generateBtn" class="btn btn-success">
+                                <i class="bi bi-plus-circle"></i> Generate Baru
+                            </button>
+                            <button id="syncBtn" class="btn btn-warning">
+                                <i class="bi bi-cloud-arrow-up"></i> Sync ke Sheet
+                            </button>
+                            <button id="exportBtn" class="btn btn-info">
+                                <i class="bi bi-download"></i> Export CSV
+                            </button>
+                            <button id="backBtn" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Kembali ke App
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- License Table -->
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Data Lisensi</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Kode</th>
+                                        <th>Paket</th>
+                                        <th>Customer</th>
+                                        <th>Device ID</th>
+                                        <th>Dibuat</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="licenseTableBody">
+                                    <!-- Data akan diisi JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Generate Form -->
+                <div class="card mt-4" id="generateForm" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-magic me-2"></i>Generate Lisensi Baru</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Paket</label>
+                                <select id="packageSelect" class="form-select">
+                                    <option value="trial">Trial (2 hari)</option>
+                                    <option value="basic">Basic (1 tahun)</option>
+                                    <option value="premium">Premium (1 tahun)</option>
+                                    <option value="vip">VIP (Seumur hidup)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Customer</label>
+                                <input type="text" id="customerInput" class="form-control" placeholder="Nama customer">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Device ID (Opsional)</label>
+                                <input type="text" id="deviceIdInput" class="form-control" placeholder="Device ID tujuan">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button id="generateSubmitBtn" class="btn btn-success">
+                                <i class="bi bi-magic"></i> Generate Kode
+                            </button>
+                            <button id="cancelGenerateBtn" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Batal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Result Modal -->
+    <div class="modal fade" id="resultModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle me-2"></i>Berhasil</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="online-license-api.js"></script>
+    <script>
+        // Admin Online System
+        var AdminOnlineSystem = {
+            api: null,
+            licenses: [],
+            
+            init: function() {
+                this.api = window.onlineLicenseAPI;
+                this.setupEvents();
+                this.checkConnection();
+                this.loadData();
+                
+                // Auto refresh every 30 seconds
+                setInterval(this.loadData.bind(this), 30000);
+            },
+            
+            setupEvents: function() {
+                document.getElementById('refreshBtn').addEventListener('click', this.loadData.bind(this));
+                document.getElementById('generateBtn').addEventListener('click', this.showGenerateForm.bind(this));
+                document.getElementById('syncBtn').addEventListener('click', this.syncToSheet.bind(this));
+                document.getElementById('exportBtn').addEventListener('click', this.exportCSV.bind(this));
+                document.getElementById('backBtn').addEventListener('click', function() {
+                    window.close();
+                });
+                document.getElementById('generateSubmitBtn').addEventListener('click', this.generateLicense.bind(this));
+                document.getElementById('cancelGenerateBtn').addEventListener('click', this.hideGenerateForm.bind(this));
+            },
+            
+            checkConnection: function() {
+                if (this.api && this.api.isOnline) {
+                    document.getElementById('connectionStatus').className = 'status-badge status-online';
+                    document.getElementById('connectionStatus').innerHTML = '<i class="bi bi-wifi"></i><span>ONLINE</span>';
+                } else {
+                    document.getElementById('connectionStatus').className = 'status-badge status-offline';
+                    document.getElementById('connectionStatus').innerHTML = '<i class="bi bi-wifi-off"></i><span>OFFLINE</span>';
+                }
+            },
+            
+            showLoading: function(message) {
+                document.getElementById('loadingText').textContent = message || 'Memuat...';
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            },
+            
+            hideLoading: function() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            },
+            
+            loadData: function() {
+                if (!this.api) return;
+                
+                this.showLoading('Mengambil data dari spreadsheet...');
+                
+                this.api.loadFromSpreadsheet()
+                    .then(function(result) {
+                        if (result.success) {
+                            this.licenses = result.data || [];
+                            this.updateStats();
+                            this.updateTable();
+                        }
+                    }.bind(this))
+                    .catch(function(error) {
+                        console.error('Load data error:', error);
+                        // Fallback to local data
+                        var localData = JSON.parse(localStorage.getItem('generated_licenses') || '[]');
+                        this.licenses = localData;
+                        this.updateStats();
+                        this.updateTable();
+                    }.bind(this))
+                    .finally(function() {
+                        this.hideLoading();
+                    }.bind(this));
+            },
+            
+            updateStats: function() {
+                var total = this.licenses.length;
+                var active = this.licenses.filter(function(l) { return l.status === 'active'; }).length;
+                var pending = this.licenses.filter(function(l) { return l.status === 'pending'; }).length;
+                var used = this.licenses.filter(function(l) { return l.status === 'used'; }).length;
+                
+                document.getElementById('totalLicenses').textContent = total;
+                document.getElementById('activeLicenses').textContent = active;
+                document.getElementById('pendingLicenses').textContent = pending;
+                document.getElementById('usedLicenses').textContent = used;
+            },
+            
+            updateTable: function() {
+                var tbody = document.getElementById('licenseTableBody');
+                tbody.innerHTML = '';
+                
+                this.licenses.forEach(function(license, index) {
+                    var row = document.createElement('tr');
+                    
+                    var statusClass = 'secondary';
+                    var statusText = 'Unknown';
+                    
+                    switch(license.status) {
+                        case 'active': statusClass = 'success'; statusText = 'Aktif'; break;
+                        case 'pending': statusClass = 'warning'; statusText = 'Pending'; break;
+                        case 'used': statusClass = 'danger'; statusText = 'Terpakai'; break;
+                    }
+                    
+                    row.innerHTML = [
+                        '<td><code>' + (license.code || 'N/A') + '</code></td>',
+                        '<td>' + (license.package || 'N/A') + '</td>',
+                        '<td>' + (license.customerName || 'Anonymous') + '</td>',
+                        '<td><small>' + (license.deviceId || 'N/A') + '</small></td>',
+                        '<td>' + (license.created ? new Date(license.created).toLocaleDateString('id-ID') : 'N/A') + '</td>',
+                        '<td><span class="badge bg-' + statusClass + '">' + statusText + '</span></td>',
+                        '<td>',
+                        '    <button class="btn btn-sm btn-outline-primary" onclick="AdminOnlineSystem.copyLicense(\'' + (license.code || '') + '\')">',
+                        '        <i class="bi bi-copy"></i>',
+                        '    </button>',
+                        '</td>'
+                    ].join('');
+                    
+                    tbody.appendChild(row);
+                });
+            },
+            
+            showGenerateForm: function() {
+                document.getElementById('generateForm').style.display = 'block';
+            },
+            
+            hideGenerateForm: function() {
+                document.getElementById('generateForm').style.display = 'none';
+            },
+            
+            generateLicense: function() {
+                var packageType = document.getElementById('packageSelect').value;
+                var customerName = document.getElementById('customerInput').value;
+                var deviceId = document.getElementById('deviceIdInput').value;
+                
+                if (!customerName.trim()) {
+                    alert('Masukkan nama customer!');
+                    return;
+                }
+                
+                this.showLoading('Membuat lisensi...');
+                
+                if (this.api && this.api.isOnline) {
+                    // Generate online
+                    this.api.generateOnlineLicense(packageType, deviceId, customerName)
+                        .then(function(result) {
+                            if (result.success) {
+                                this.showResult('Kode Lisensi Berhasil Digenerate!', [
+                                    '<p><strong>Kode:</strong> <code>' + result.licenseCode + '</code></p>',
+                                    '<p><strong>Paket:</strong> ' + packageType + '</p>',
+                                    '<p><strong>Customer:</strong> ' + customerName + '</p>',
+                                    '<div class="alert alert-info mt-3">',
+                                    '    <i class="bi bi-info-circle"></i>',
+                                    '    Lisensi telah tersimpan di spreadsheet online',
+                                    '</div>'
+                                ].join(''));
+                                this.loadData();
+                            }
+                        }.bind(this))
+                        .catch(function(error) {
+                            alert('Error: ' + error.message);
+                        })
+                        .finally(function() {
+                            this.hideLoading();
+                            this.hideGenerateForm();
+                        }.bind(this));
+                } else {
+                    // Generate offline
+                    var licenseCode = 'RH-MTV-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                    
+                    // Add to local storage
+                    var licenseData = {
+                        code: licenseCode,
+                        package: packageType,
+                        customerName: customerName,
+                        deviceId: deviceId || 'N/A',
+                        created: new Date().toISOString(),
+                        status: 'pending',
+                        localOnly: true
+                    };
+                    
+                    var localLicenses = JSON.parse(localStorage.getItem('generated_licenses') || '[]');
+                    localLicenses.push(licenseData);
+                    localStorage.setItem('generated_licenses', JSON.stringify(localLicenses));
+                    
+                    // Add to pending
+                    this.api.addPendingLicense(licenseData);
+                    
+                    this.showResult('Kode Lisensi Berhasil Digenerate (Offline)!', [
+                        '<p><strong>Kode:</strong> <code>' + licenseCode + '</code></p>',
+                        '<p><strong>Paket:</strong> ' + packageType + '</p>',
+                        '<p><strong>Customer:</strong> ' + customerName + '</p>',
+                        '<div class="alert alert-warning mt-3">',
+                        '    <i class="bi bi-exclamation-triangle"></i>',
+                        '    Lisensi disimpan secara lokal. Sync ke spreadsheet saat online.',
+                        '</div>'
+                    ].join(''));
+                    
+                    this.hideLoading();
+                    this.hideGenerateForm();
+                    this.loadData();
+                }
+            },
+            
+            syncToSheet: function() {
+                if (!this.api) return;
+                
+                this.showLoading('Menyinkronisasi ke spreadsheet...');
+                
+                this.api.syncToSpreadsheet()
+                    .then(function(result) {
+                        alert(result.message);
+                        this.loadData();
+                    }.bind(this))
+                    .catch(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .finally(function() {
+                        this.hideLoading();
+                    }.bind(this));
+            },
+            
+            exportCSV: function() {
+                var csv = 'Kode,Paket,Customer,Device ID,Dibuat,Status\n';
+                
+                this.licenses.forEach(function(license) {
+                    csv += [
+                        license.code || '',
+                        license.package || '',
+                        license.customerName || '',
+                        license.deviceId || '',
+                        license.created || '',
+                        license.status || ''
+                    ].join(',') + '\n';
+                });
+                
+                var blob = new Blob([csv], { type: 'text/csv' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'licenses_' + new Date().toISOString().split('T')[0] + '.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            },
+            
+            showResult: function(title, content) {
+                document.getElementById('resultContent').innerHTML = content;
+                var modal = new bootstrap.Modal(document.getElementById('resultModal'));
+                modal.show();
+            },
+            
+            copyLicense: function(code) {
+                navigator.clipboard.writeText(code)
+                    .then(function() {
+                        alert('Kode disalin: ' + code);
+                    })
+                    .catch(function() {
+                        // Fallback
+                        var textArea = document.createElement('textarea');
+                        textArea.value = code;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        alert('Kode disalin: ' + code);
+                    });
+            }
+        };
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    AdminOnlineSystem.init();
+                }, 1000);
+            });
+        } else {
+            setTimeout(function() {
+                AdminOnlineSystem.init();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
