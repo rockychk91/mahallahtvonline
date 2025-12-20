@@ -20,6 +20,7 @@
   <script src="ayathadits.js"></script>
   
   <!-- Screen Manager -->
+  <script src="screen-manager.js"></script>
   <style>
     /* Hilangkan scrollbar vertikal dan horizontal */
     html, body {
@@ -51,6 +52,13 @@
         background: white;
     }
 
+    /* Frame Kiri (30%) */
+    .media-left {
+        width: 30%;
+        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+        overflow: hidden;
+    }
+
     /* Frame Kanan (70%) */
     .media-right {
         width: 70%;
@@ -71,6 +79,75 @@
       object-fit: cover;
       width: 100%;
       height: 100%;
+    }
+
+    /* Carousel Kiri */
+    #leftCarousel {
+      height: 100%;
+      background: #0c3321;
+    }
+
+    #leftCarousel .carousel-item {
+      height: 100%;
+      padding: 10px;
+    }
+
+    /* Tambahkan di bagian CSS */
+    #leftCarousel .carousel-indicators {
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        z-index: 2;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    #leftCarousel .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        margin: 0 5px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Tambahkan di bagian CSS */
+    #leftCarousel .carousel-item,
+    #mainCarousel .carousel-item {
+        pointer-events: none !important; /* Mencegah click events */
+    }
+
+    #leftCarousel .carousel-item .left-card,
+    #mainCarousel .carousel-item img {
+        pointer-events: none !important; /* Pastikan child elements juga tidak bisa diklik */
+    }
+
+    /* Biarkan hanya carousel indicators yang bisa diklik */
+    #leftCarousel .carousel-indicators button,
+    #mainCarousel .carousel-indicators button {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+    }
+
+    .left-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .left-card .card-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
     }
 
     /* Jadwal Adzan */
@@ -524,157 +601,54 @@
       }
     }
 
-    /* ================== UPGRADE MODAL ================== */
-
-    .upgrade-modal {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    /* Tombol Screen OFF */
+    #screenOffBtn {
+      position: fixed;
+      top: 22px;
+      left: 10px;
+      z-index: 1002;
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      line-height: 35px;
+      cursor: pointer;
+      font-size: 20px;
     }
 
-    .upgrade-header {
-    background: linear-gradient(135deg, #ff9800, #ffc107);
-    color: #333;
-    font-weight: bold;
-    text-align: center;
+    #screenOffBtn i {
+      pointer-events: none;
     }
 
-    .upgrade-header .modal-title {
-    width: 100%;
-    text-align: center;
-    }
-
-    /* Card Paket */
-    .upgrade-card {
-    border: 2px solid #e0e0e0;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 15px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    background: #fff;
-    }
-
-    .upgrade-card:hover {
-    border-color: #005a31;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,90,49,0.25);
-    }
-
-    /* Judul Paket */
-    .upgrade-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #005a31;
-    }
-
-    /* Harga */
-    .upgrade-price del {
-    display: block;
-    color: #999;
-    font-size: 14px;
-    }
-
-    .upgrade-price span {
-    font-size: 24px;
-    font-weight: 800;
-    color: #e53935;
-    }
-
-    /* Catatan */
-    .upgrade-note {
-    margin-top: 6px;
-    font-size: 13px;
-    color: #666;
-    }
-
-    /* Paket Terbaik */
-    .upgrade-card.best {
-    border-color: #ff9800;
-    background: #fff8e1;
-    position: relative;
-    }
-
-    .badge-best {
-    position: absolute;
-    top: -10px;
-    right: -10px;
-    background: #ff9800;
-    color: #fff;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 12px;
-    }
-
-    /* Paket Lifetime */
-    .upgrade-card.lifetime {
-    border-color: #673ab7;
-    }
-
-    .upgrade-card.lifetime .upgrade-title {
-    color: #673ab7;
-    }
-
-    /* Untuk STB / layar kecil */
+    /* Samakan ukuran dengan tombol gir */
     @media (max-width: 768px) {
-    .upgrade-price span {
+      #screenOffBtn {
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
         font-size: 22px;
-    }
-    }
-
-    /* ================= POPUP TRIAL ================= */
-
-    .trial-modal {
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      }
     }
 
-    .trial-header {
-    background: linear-gradient(135deg, #005a31, #00816d);
-    color: #fff;
-    text-align: center;
+    #screenblack {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: none;
+      z-index: 20000;
     }
-
-    .trial-header .modal-title {
-    width: 100%;
-    }
-
-    .trial-box {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 12px 15px;
-    font-size: 14px;
-    }
-
-    .trial-box ul {
-    padding-left: 18px;
-    margin-top: 8px;
-    }
-
-    .trial-box li {
-    margin-bottom: 6px;
-    }
-
-    #lisensiBox {
-      background: #f8f9fa;
-      padding: 12px;
-      border-radius: 10px;
-    }
-
-    #lisensiResult {
-      font-size: 14px;
-    }
-
-
-
 
 
   </style>
 </head>
 <body>
+
+<div id="screenblack"></div>
+
 
 <!-- Black Overlay -->
 <div id="blackOverlay">
@@ -692,6 +666,10 @@
     <!-- Kiri: Tanggal dan Kalender Hijriyah -->
     <div class="col-12 col-md-4 text-start mb-2 mb-md-0">
       <div id="currentDate" style="font-size: 22px; font-weight: 600; margin-left: 40px;"></div>
+      <!-- Tombol Screen OFF -->
+      <div id="screenOffBtn">
+        <i class="bi bi-power"></i>
+      </div>
       <div id="hijriDate" style="font-size: 18px; color: #c6f6d5; margin-left: 40px;"></div>
     </div>
     <!-- Tengah: Logo & Nama Masjid serta Alamat -->
@@ -713,9 +691,23 @@
 
 <!-- Media Container -->
 <div class="media-container">
+  <!-- Frame Kiri (30%) -->
+  <div class="media-left">
+    <div id="leftCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="10000">
+      <div class="carousel-inner h-100" id="leftCarouselInner">
+        <!-- Slide akan diisi JavaScript -->
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#leftCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#leftCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
 
   <!-- Frame Kanan (70%) -->
-<div class="media-right" style="width:100%;">
+  <div class="media-right">
     <div id="mainCarousel" class="carousel slide h-100" data-bs-ride="carousel" data-bs-interval="8000">
       <div class="carousel-indicators">
         <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active"></button>
@@ -743,7 +735,9 @@
     <table class="table table-bordered text-center m-0">
       <thead>
         <tr id="jadwalHeader">
+            <th id="thImsak">Imsak</th> <!-- TAMBAH INI -->
             <th id="thShubuh">Shubuh</th>
+            <th id="thSyuruq">Syuruq</th>
             <th id="thDzuhur">Dzuhur</th>
             <th id="thAshar">Ashar</th>
             <th id="thMaghrib">Maghrib</th> <!-- TAMBAH INI -->
@@ -752,7 +746,9 @@
       </thead>
       <tbody>
         <tr id="jadwalTimes">
+          <td id="timeImsak">--:--</td>
           <td id="timeShubuh">--:--</td>
+          <td id="timeSyuruq">--:--</td>
           <td id="timeDzuhur">--:--</td>
           <td id="timeAshar">--:--</td>
           <td id="timeMaghrib">--:--</td>
@@ -914,64 +910,32 @@
 <!-- Main Offcanvas Menu -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="mainOffcanvasMenu" aria-labelledby="mainOffcanvasMenuLabel">
   <div class="offcanvas-header bg-primary text-white">
-    <h4 class="offcanvas-title" id="mainOffcanvasMenuLabel">
-      <i class="bi bi-gear-fill me-2"></i>Pengaturan
-    </h4>
+    <h4 class="offcanvas-title" id="mainOffcanvasMenuLabel"><i class="bi bi-gear-fill me-2"></i>Pengaturan</h4>
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
   </div>
-
   <div class="offcanvas-body">
     <div class="d-grid gap-2">
-
+      <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDataMasjid">
+        <i class="bi bi-building me-2"></i>Data Masjid
+      </button>
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRunningText">
         <i class="bi bi-textarea-t me-2"></i>Running Text
       </button>
-
+      <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPesanTeks">
+        <i class="bi bi-chat-text me-2"></i>Pesan Teks (Slide 1)
+      </button>
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUploadGambar">
         <i class="bi bi-images me-2"></i>Upload Gambar
       </button>
-
+      <button class="btn btn-success btn-lg" onclick="showSliderSettingsForm()">
+        <i class="bi bi-sliders me-2"></i>Durasi Slider
+      </button>
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTutorial">
         <i class="bi bi-book me-2"></i>Tutorial
       </button>
-
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasInfoAplikasi">
         <i class="bi bi-info-circle me-2"></i>Info Aplikasi
       </button>
-
-      <!-- TOMBOL LISENSI (DISAMAKAN STYLE) -->
-      <button class="btn btn-success btn-lg" onclick="toggleLisensiForm()">
-        <i class="bi bi-key-fill me-2"></i>Lisensi
-      </button>
-
-      <!-- BOX LISENSI -->
-      <div id="lisensiBox" class="p-3 border rounded" style="display:none;">
-
-        <input type="text"
-               id="kodeLisensiInput"
-               class="form-control mb-2"
-               placeholder="Masukkan Kode Lisensi">
-
-        <button class="btn btn-primary w-100 mb-2"
-                onclick="cekLisensi()">
-          <i class="bi bi-shield-check me-1"></i>
-          Cek Lisensi
-        </button>
-
-        <div id="lisensiResult"
-             class="alert"
-             style="display:none;"></div>
-
-        <button id="btnUpgradeLisensi"
-                class="btn btn-warning w-100"
-                style="display:none;"
-                onclick="upgradeLisensi()">
-          <i class="bi bi-arrow-up-circle me-1"></i>
-          Upgrade
-        </button>
-
-      </div>
-
     </div>
   </div>
 </div>
@@ -1169,9 +1133,11 @@
           <div class="accordion-body">
             <p>Aplikasi memiliki masa aktif yang dapat diperpanjang:</p>
             <ul>
-              <li>3 Bulan: Rp 99.000</li>
-              <li>1 Tahun: Rp 450.000</li>
-              <li>Seumur Hidup: Rp 1.300.000</li>
+              <li>Trial: 30 hari</li>
+              <li>3 Bulan: Rp 100.000</li>
+              <li>1 Tahun: Rp 600.000</li>
+              <li>3 Tahun: Rp 1.000.000</li>
+              <li>Seumur Hidup: Rp 2.500.000</li>
             </ul>
             <p>Hubungi developer untuk perpanjangan</p>
           </div>
@@ -1201,14 +1167,14 @@
         <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Status Lisensi</h6>
       </div>
       <div class="card-body">
-        <p><strong>Paket:</strong> <span>Trial</span></p>
-        <p><strong>Status:</strong> <span class="badge bg-success">Aktif</span></p>
-        <p><strong>Berakhir:</strong> <span>-</span></p>
-        <p><strong>Sisa Hari:</strong> <span>-</span></p>
-        <button class="btn btn-warning w-100 mt-3" onclick="showUpgradePopup()">
-        Upgrade
-        </button>
-
+        <p><strong>Paket:</strong> <span id="licensePackage">Trial</span></p>
+        <p><strong>Status:</strong> <span id="licenseStatusText" class="badge bg-success">Aktif</span></p>
+        <p><strong>Berakhir:</strong> <span id="licenseExpiryDate">-</span></p>
+        <p><strong>Sisa Hari:</strong> <span id="licenseDaysLeft">30</span> hari</p>
+        <div class="progress mb-2">
+          <div id="licenseProgressBar" class="progress-bar" style="width: 100%"></div>
+        </div>
+        <small class="text-muted" id="licenseProgressText">100% tersisa</small>
       </div>
     </div>
     
@@ -1225,98 +1191,6 @@
   </div>
 </div>
 
-<div class="modal fade" id="upgradeModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content upgrade-modal">
-
-      <div class="modal-header upgrade-header">
-        <h5 class="modal-title">
-          🚀 Upgrade Paket Aplikasi
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body">
-
-        <!-- Paket 3 Bulan -->
-        <div class="upgrade-card" onclick="goUpgrade()">
-          <div class="upgrade-title">Paket 3 Bulan</div>
-          <div class="upgrade-price">
-            <del>Rp 120.000</del>
-            <span>Rp 99.000</span>
-          </div>
-          <div class="upgrade-note">Cocok untuk uji coba jangka pendek</div>
-        </div>
-
-        <!-- Paket 1 Tahun -->
-        <div class="upgrade-card best" onclick="goUpgrade()">
-          <div class="badge-best">PALING POPULER</div>
-          <div class="upgrade-title">Paket 1 Tahun</div>
-          <div class="upgrade-price">
-            <del>Rp 450.000</del>
-            <span>Rp 395.000</span>
-          </div>
-          <div class="upgrade-note">Hemat & paling banyak dipilih</div>
-        </div>
-
-        <!-- Paket Lifetime -->
-        <div class="upgrade-card lifetime" onclick="goUpgrade()">
-          <div class="upgrade-title">Paket Lifetime</div>
-          <div class="upgrade-price">
-            <del>Rp 1.300.000</del>
-            <span>Rp 999.000</span>
-          </div>
-          <div class="upgrade-note">Sekali bayar, selamanya</div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- POPUP INFO PAKET TRIAL -->
-<div class="modal fade" id="trialInfoModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content trial-modal">
-
-      <div class="modal-header trial-header">
-        <h5 class="modal-title">ℹ️ Informasi Paket Trial</h5>
-      </div>
-
-      <div class="modal-body">
-        <p><b>Paket:</b> Trial</p>
-
-        <div class="trial-box">
-          <b>Akses dibatasi:</b>
-          <ul>
-            <li>Tabel Imsak dan Syuruq</li>
-            <li>Pengaturan Data Masjid</li>
-            <li>Slide Info Hari Besar Islam, Info Masjid, Ayat & Hadits</li>
-            <li>Upload gambar maksimal 2</li>
-            <li>Durasi Slide</li>
-            <li>Teks Maghrib dan Isya</li>
-            <li>Tombol ON/OFF Layar</li>
-          </ul>
-        </div>
-
-        <div class="d-grid gap-2 mt-3">
-          <button class="btn btn-warning" onclick="goUpgrade()">
-            🚀 Upgrade
-          </button>
-          <button class="btn btn-outline-secondary" onclick="closeTrialPopup()">
-            Lewati
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-
-
-
 <!-- ==================== AUDIO ELEMENTS ==================== -->
 <audio id="audioShalawat" src="shalawat.mp3" loop preload="none"></audio>
 <audio id="audioAdzan" src="adzan.mp3" preload="none"></audio>
@@ -1327,7 +1201,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ==================== VARIABLES GLOBAL ====================
-var API_URL = 'https://script.google.com/macros/s/AKfycbyED_WbadUy5Yo4jlt_BcHJpn_O03I4NOWTmEwQFjd9VaycxYTmDnn3erVZWBvjjEs/exec';
 var adzanSchedule = {};
 var currentPrayer = '';
 var isSTB = false;
@@ -1374,7 +1247,10 @@ var blackOverlayInterval = null;
 // ✅ DEFAULT GAMBAR CAROUSEL KANAN
 var defaultMainImages = [
   'default1.jpg',
-  'default2.jpg'
+  'default2.jpg',
+  'default3.jpg',
+  'default4.jpg',
+  'default5.jpg'
 ];
 
 
@@ -1422,35 +1298,6 @@ window.onload = function() {
     setInterval(updateJumatDisplay, 60000);
     
 };
-
-(function () {
-
-  window.addEventListener('load', function () {
-
-    // Cek apakah halaman ini hasil refresh
-    var isRefresh = sessionStorage.getItem('is_refresh');
-
-    // Jika BUKAN refresh → tampilkan popup
-    if (!isRefresh) {
-      var modalEl = document.getElementById('trialInfoModal');
-      if (modalEl) {
-        var modal = new bootstrap.Modal(modalEl);
-        modal.show();
-      }
-    }
-
-    // Reset flag
-    sessionStorage.removeItem('is_refresh');
-  });
-
-  // Tandai bahwa halaman akan direfresh
-  window.addEventListener('beforeunload', function () {
-    sessionStorage.setItem('is_refresh', '1');
-  });
-
-})();
-
-
 
 
 // ==================== FUNGSI TANGGAL & WAKTU ====================
@@ -2453,6 +2300,9 @@ setupPopupEvents();
 function initCarousels() {
     // Load slider settings
     loadSliderSettings();
+
+    // Load carousel kiri
+    loadLeftCarousel();
     
     // Load carousel kanan
     loadMainCarousel();
@@ -2529,6 +2379,87 @@ function setupCarouselTransitions() {
     }
 }
 
+function loadLeftCarousel() {
+    try {
+        var inner = document.getElementById('leftCarouselInner');
+        if (!inner) return;
+        
+        // AMBIL HIDDEN SLIDES DARI LISENSI
+        var licenseHiddenSlides = [];
+        try {
+            var hiddenSlidesStr = localStorage.getItem('license_hidden_slides');
+            if (hiddenSlidesStr) {
+                licenseHiddenSlides = JSON.parse(hiddenSlidesStr);
+            }
+        } catch (e) {
+            console.log('Error reading license hidden slides:', e);
+        }
+        
+        console.log('Slides hidden by license:', licenseHiddenSlides);
+        
+        // Buat semua slide yang mungkin
+        var allSlides = [
+            { num: 1, content: createLeftSlide1() },
+            { num: 2, content: createLeftSlide2() },
+            { num: 3, content: createLeftSlide3() },
+            { num: 4, content: createLeftSlide4() }
+        ];
+        
+        // Filter slide yang TIDAK dihidden dan ADA kontennya
+        var activeSlides = [];
+        for (var i = 0; i < allSlides.length; i++) {
+            var slide = allSlides[i];
+            
+            // Skip jika slide dihidden oleh lisensi
+            if (licenseHiddenSlides.includes(slide.num)) {
+                console.log('Slide ' + slide.num + ' hidden by license');
+                continue;
+            }
+            
+            // Skip jika konten kosong/null
+            if (!slide.content || slide.content.trim() === '') {
+                console.log('Slide ' + slide.num + ' has no content');
+                continue;
+            }
+            
+            activeSlides.push({
+                num: slide.num,
+                content: slide.content,
+                id: 'slide' + slide.num
+            });
+        }
+        
+        // Jika tidak ada slide aktif, buat default
+        if (activeSlides.length === 0) {
+            activeSlides.push({
+                num: 0,
+                content: '<h5><i class="bi bi-info-circle text-primary"></i> Informasi</h5>' +
+                        '<div class="alert alert-warning mt-3">Belum ada konten untuk ditampilkan</div>',
+                id: 'default'
+            });
+        }
+        
+        // Kosongkan carousel inner
+        inner.innerHTML = '';
+        
+        // Tambahkan hanya slide aktif
+        for (var j = 0; j < activeSlides.length; j++) {
+            var slide = activeSlides[j];
+            var item = document.createElement('div');
+            item.className = 'carousel-item' + (j === 0 ? ' active' : '');
+            item.id = slide.id;
+            item.innerHTML = '<div class="left-card"><div class="card-body">' + 
+                           slide.content + '</div></div>';
+            inner.appendChild(item);
+        }
+        
+        // Setup carousel berdasarkan jumlah slide
+        setupCarouselForSlideCount(activeSlides.length);
+        
+    } catch (e) {
+        console.log('Error loadLeftCarousel:', e);
+    }
+}
 
 // FUNGSI BARU UNTUK SETUP CAROUSEL
 function setupCarouselForSlideCount(slideCount) {
@@ -2605,6 +2536,115 @@ function updateCarouselIndicators(slideCount) {
         console.log('Error updateCarouselIndicators:', e);
     }
 }
+
+function createLeftSlide1() {
+    var message = settings.customMessage || 'Selamat datang di Masjid Al-Muthmainnah';
+    return '<h5><i class="bi bi-chat-text text-primary"></i> </h5>' +
+           '<div style="margin-top: 20px; font-size: 16px; line-height: 1.6;">' +
+           message.replace(/\\n/g, '<br>') +
+           '</div>';
+}
+
+function createLeftSlide2() {
+    try {
+        if (typeof hariIslamData !== 'undefined') {
+
+            // Pastikan updateHijri sudah dipanggil saat init
+            var hijriDate = window.currentHijriDate;
+
+            if (!hijriDate) {
+                console.log('Hijri date object belum tersedia');
+                return null;
+            }
+
+            var messages = hariIslamData.getMessages(hijriDate);
+
+            if (messages && messages.length > 0) {
+                var content = '<h5><i class="bi bi-calendar-event text-success"></i> Hari Besar Islam Hari Ini</h5>';
+                for (var i = 0; i < messages.length; i++) {
+                    content += '<div class="alert alert-success mt-2">' + messages[i] + '</div>';
+                }
+                return content;
+            }
+
+            return null;
+        }
+    } catch (e) {
+        console.log('Error createLeftSlide2:', e);
+    }
+    return null;
+}
+
+
+function createLeftSlide3() {
+    try {
+        if (typeof ayatHaditsData !== 'undefined' && ayatHaditsData.length > 0) {
+            var randomIndex = Math.floor(Math.random() * ayatHaditsData.length);
+            var item = ayatHaditsData[randomIndex];
+            
+            return '<h5><i class="bi bi-book text-warning"></i> ' + item.jenis + '</h5>' +
+                   '<small class="text-muted">Tentang: ' + item.tentang + '</small>' +
+                   '<div style="font-size: 16px; text-align: right; direction: rtl; margin-top: 15px;">' +
+                   item.isi +
+                   '</div>' +
+                   '<div style="font-size: 14px; font-style: italic; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">' +
+                   '<i class="bi bi-translate text-primary me-2"></i>' + item.terjemahan +
+                   '</div>';
+        }
+    } catch (e) {
+        console.log('Error createLeftSlide3:', e);
+    }
+    return null;
+}
+
+function createLeftSlide4() {
+    try {
+        if (typeof hariIslamData === 'undefined') {
+            return null;
+        }
+
+        // Ambil langsung object Hijriyah global
+        var hijriDate = window.currentHijriDate;
+
+        if (!hijriDate) {
+            return null;
+        }
+        var upcomingEvents = hariIslamData.getUpcomingEvents(hijriDate, 2);
+
+        if (upcomingEvents && upcomingEvents.length > 0) {
+            var hijriMonths = [
+                'Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir',
+                'Jumadil Awal', 'Jumadil Akhir', 'Rajab', 'Sya\'ban',
+                'Ramadhan', 'Syawal', 'Dzulqaidah', 'Dzulhijjah'
+            ];
+
+            var content = '<h5><i class="bi bi-clock-history text-info"></i> Hari Besar Islam</h5>';
+
+            for (var i = 0; i < upcomingEvents.length; i++) {
+                var event = upcomingEvents[i];
+                var daysText = event.days === 1 ? 'besok' : event.days + ' hari lagi';
+                var monthName = hijriMonths[event.month - 1] || ('Bulan ' + event.month);
+
+                content +=
+                    '<div class="alert alert-info mt-2">' +
+                        '<div class="fw-bold">' + daysText + '</div>' +
+                        '<div>' + event.name + '</div>' +
+                        '<small class="text-muted">' +
+                            event.day + ' ' + monthName + ' ' + hijriDate.year + ' H' +
+                        '</small>' +
+                    '</div>';
+            }
+
+            return content;
+        }
+
+    } catch (e) {
+        console.log('Error createLeftSlide4:', e);
+    }
+
+    return null;
+}
+
 
 function loadMainCarousel() {
     const carouselInner = document.getElementById('mainCarouselInner');
@@ -2777,8 +2817,18 @@ function saveRunningText() {
     }
 }
 
+function savePesanTeks() {
+    var message = document.getElementById('pesanTeksInput').value || '';
+    settings.customMessage = message.replace(/\n/g, '\\n');
+    
+    if (saveSettings()) {
+        loadLeftCarousel();
+        alert('Pesan teks berhasil disimpan!');
+    }
+}
+
 function setupPrayerClickEvents() {
-  const prayers = ['Shubuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+  const prayers = ['Imsak', 'Shubuh', 'Syuruq', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
   
   prayers.forEach(prayer => {
     const element = document.getElementById(`time${prayer}`);
@@ -3003,6 +3053,7 @@ function setupMenuEvents() {
                 
                 if (saveSettings()) {
                     loadSettings();
+                    loadLeftCarousel();
                     loadMainCarousel();
                     updateRunningTextUI();
                     alert('Data berhasil direset!');
@@ -3247,10 +3298,6 @@ function uploadImages() {
         
         var reader = new FileReader();
         reader.onload = (function(file) {
-            if (settings.uploadedImages && settings.uploadedImages.length >= 2) {
-                alert('Maksimal hanya 2 gambar');
-                return;
-            }
             return function(e) {
                 settings.uploadedImages.push({
                     name: file.name,
@@ -3822,14 +3869,6 @@ window.onload = function() {
     }
 };
 
-setTimeout(function () {
-  var thMaghrib = document.getElementById('thMaghrib');
-  var thIsya = document.getElementById('thIsya');
-
-  if (thMaghrib) thMaghrib.innerHTML = '---';
-  if (thIsya) thIsya.innerHTML = '---';
-}, 1 * 60 * 1000); // 15 menit
-
 // Modifikasi fungsi stopAllAudio untuk integrasi
 function stopAllAudio() {
     try {
@@ -3881,151 +3920,7 @@ function stopAllAudio() {
     }
 }
 
-function showUpgradePopup() {
-  var modal = new bootstrap.Modal(document.getElementById('upgradeModal'));
-  modal.show();
-}
 
-function goUpgrade() {
-  window.location.href = 'formdatauser.html';
-}
-
-function closeTrialPopup() {
-  var modalEl = document.getElementById('trialInfoModal');
-  var modal = bootstrap.Modal.getInstance(modalEl);
-  if (modal) modal.hide();
-}
-
-
-function toggleLisensiForm() {
-  var box = document.getElementById('lisensiBox');
-  if (!box) return;
-
-  box.style.display = (box.style.display === 'none') ? 'block' : 'none';
-}
-
-function cekLisensi() {
-
-  var kode = document.getElementById('kodeLisensiInput').value.trim().toUpperCase();
-  var resultBox = document.getElementById('lisensiResult');
-  var btnUpgrade = document.getElementById('btnUpgradeLisensi');
-
-  if (!kode) {
-    showLisensiResult('danger', 'Masukkan kode lisensi terlebih dahulu');
-    return;
-  }
-
-  resultBox.style.display = 'block';
-  resultBox.className = 'alert alert-info';
-  resultBox.innerHTML = 'Memeriksa lisensi...';
-  btnUpgrade.style.display = 'none';
-
-  var xhr = new XMLHttpRequest();
-  var url = 'https://script.google.com/macros/s/AKfycbyED_WbadUy5Yo4jlt_BcHJpn_O03I4NOWTmEwQFjd9VaycxYTmDnn3erVZWBvjjEs/exec'
-          + '?action=cekLisensi'
-          + '&kode=' + encodeURIComponent(kode)
-          + '&device_id=' + encodeURIComponent(getDeviceId())
-          + '&nama_masjid=' + encodeURIComponent(getNamaMasjid());
-
-  xhr.open('GET', url, true);
-
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-
-      try {
-        var res = JSON.parse(xhr.responseText);
-
-        if (res.valid) {
-
-          showLisensiResult(
-            'success',
-            '<b>Lisensi Valid</b><br>Paket ' + res.paket
-          );
-
-          // ✅ SIMPAN KODE LISENSI (INI YANG SEBELUMNYA BELUM ADA)
-          window._kodeLisensiAktif = kode;
-
-          // simpan status lokal (opsional, tetap aman)
-          localStorage.setItem('lisensi_valid', '1');
-          localStorage.setItem('lisensi_paket', res.paket);
-
-          // 🔑 tombol upgrade hanya untuk status pending
-          if (res.status === 'pending') {
-            btnUpgrade.style.display = 'block';
-          } else {
-            btnUpgrade.style.display = 'none';
-          }
-
-        }
-
-
-      } catch (e) {
-        showLisensiResult('danger', 'Respon server tidak valid');
-      }
-    }
-  };
-
-  xhr.send();
-}
-
-function showLisensiResult(type, message) {
-  var box = document.getElementById('lisensiResult');
-  box.className = 'alert alert-' + type;
-  box.innerHTML = message;
-  box.style.display = 'block';
-}
-
-function getDeviceId() {
-  var id = localStorage.getItem('device_id');
-  if (!id) {
-    id = 'HG680P-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    localStorage.setItem('device_id', id);
-  }
-  return id;
-}
-
-function getNamaMasjid() {
-  return localStorage.getItem('namaMasjid') || '';
-}
-
-function upgradeLisensi() {
-
-  var kode = window._kodeLisensiAktif || '';
-
-  if (!kode) {
-    alert('Kode lisensi tidak ditemukan');
-    return;
-  }
-
-  var deviceId = getDeviceId(); // pastikan fungsi ini SUDAH ADA
-
-  var url = API_URL +
-    '?action=upgradeLisensi' +
-    '&kode=' + encodeURIComponent(kode) +
-    '&device_id=' + encodeURIComponent(deviceId);
-
-  fetch(url)
-    .then(function(res) {
-      return res.json();
-    })
-    .then(function(data) {
-
-      if (data.success) {
-        alert('Lisensi berhasil diaktifkan\nPaket: ' + data.paket);
-
-        // 🔁 pindah ke index utama (full version)
-        window.location.href = 'index-trial.html';
-
-      } else {
-        alert(data.message || 'Upgrade gagal');
-      }
-
-    })
-    .catch(function(err) {
-      console.error(err);
-      alert('Gagal menghubungi server');
-    });
-}
 
 </script>
 </body>
