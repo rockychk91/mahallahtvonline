@@ -658,6 +658,17 @@
     margin-bottom: 6px;
     }
 
+    #lisensiBox {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    #lisensiResult {
+      font-size: 14px;
+    }
+
+
 
 
 
@@ -903,23 +914,64 @@
 <!-- Main Offcanvas Menu -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="mainOffcanvasMenu" aria-labelledby="mainOffcanvasMenuLabel">
   <div class="offcanvas-header bg-primary text-white">
-    <h4 class="offcanvas-title" id="mainOffcanvasMenuLabel"><i class="bi bi-gear-fill me-2"></i>Pengaturan</h4>
+    <h4 class="offcanvas-title" id="mainOffcanvasMenuLabel">
+      <i class="bi bi-gear-fill me-2"></i>Pengaturan
+    </h4>
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
   </div>
+
   <div class="offcanvas-body">
     <div class="d-grid gap-2">
+
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRunningText">
         <i class="bi bi-textarea-t me-2"></i>Running Text
       </button>
+
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUploadGambar">
         <i class="bi bi-images me-2"></i>Upload Gambar
       </button>
+
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTutorial">
         <i class="bi bi-book me-2"></i>Tutorial
       </button>
+
       <button class="btn btn-success btn-lg" data-bs-toggle="offcanvas" data-bs-target="#offcanvasInfoAplikasi">
         <i class="bi bi-info-circle me-2"></i>Info Aplikasi
       </button>
+
+      <!-- TOMBOL LISENSI (DISAMAKAN STYLE) -->
+      <button class="btn btn-success btn-lg" onclick="toggleLisensiForm()">
+        <i class="bi bi-key-fill me-2"></i>Lisensi
+      </button>
+
+      <!-- BOX LISENSI -->
+      <div id="lisensiBox" class="p-3 border rounded" style="display:none;">
+
+        <input type="text"
+               id="kodeLisensiInput"
+               class="form-control mb-2"
+               placeholder="Masukkan Kode Lisensi">
+
+        <button class="btn btn-primary w-100 mb-2"
+                onclick="cekLisensi()">
+          <i class="bi bi-shield-check me-1"></i>
+          Cek Lisensi
+        </button>
+
+        <div id="lisensiResult"
+             class="alert"
+             style="display:none;"></div>
+
+        <button id="btnUpgradeLisensi"
+                class="btn btn-warning w-100"
+                style="display:none;"
+                onclick="upgradeLisensi()">
+          <i class="bi bi-arrow-up-circle me-1"></i>
+          Upgrade
+        </button>
+
+      </div>
+
     </div>
   </div>
 </div>
@@ -1275,6 +1327,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ==================== VARIABLES GLOBAL ====================
+var API_URL = 'https://script.google.com/macros/s/AKfycbyED_WbadUy5Yo4jlt_BcHJpn_O03I4NOWTmEwQFjd9VaycxYTmDnn3erVZWBvjjEs/exec';
 var adzanSchedule = {};
 var currentPrayer = '';
 var isSTB = false;
@@ -3841,6 +3894,137 @@ function closeTrialPopup() {
   var modalEl = document.getElementById('trialInfoModal');
   var modal = bootstrap.Modal.getInstance(modalEl);
   if (modal) modal.hide();
+}
+
+
+function toggleLisensiForm() {
+  var box = document.getElementById('lisensiBox');
+  if (!box) return;
+
+  box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+}
+
+function cekLisensi() {
+
+  var kode = document.getElementById('kodeLisensiInput').value.trim().toUpperCase();
+  var resultBox = document.getElementById('lisensiResult');
+  var btnUpgrade = document.getElementById('btnUpgradeLisensi');
+
+  if (!kode) {
+    showLisensiResult('danger', 'Masukkan kode lisensi terlebih dahulu');
+    return;
+  }
+
+  resultBox.style.display = 'block';
+  resultBox.className = 'alert alert-info';
+  resultBox.innerHTML = 'Memeriksa lisensi...';
+  btnUpgrade.style.display = 'none';
+
+  var xhr = new XMLHttpRequest();
+  var url = 'https://script.google.com/macros/s/AKfycbyED_WbadUy5Yo4jlt_BcHJpn_O03I4NOWTmEwQFjd9VaycxYTmDnn3erVZWBvjjEs/exec'
+          + '?action=cekLisensi'
+          + '&kode=' + encodeURIComponent(kode)
+          + '&device_id=' + encodeURIComponent(getDeviceId())
+          + '&nama_masjid=' + encodeURIComponent(getNamaMasjid());
+
+  xhr.open('GET', url, true);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+
+      try {
+        var res = JSON.parse(xhr.responseText);
+
+        if (res.valid) {
+
+          showLisensiResult(
+            'success',
+            '<b>Lisensi Valid</b><br>Paket ' + res.paket
+          );
+
+          // ✅ SIMPAN KODE LISENSI (INI YANG SEBELUMNYA BELUM ADA)
+          window._kodeLisensiAktif = kode;
+
+          // simpan status lokal (opsional, tetap aman)
+          localStorage.setItem('lisensi_valid', '1');
+          localStorage.setItem('lisensi_paket', res.paket);
+
+          // 🔑 tombol upgrade hanya untuk status pending
+          if (res.status === 'pending') {
+            btnUpgrade.style.display = 'block';
+          } else {
+            btnUpgrade.style.display = 'none';
+          }
+
+        }
+
+
+      } catch (e) {
+        showLisensiResult('danger', 'Respon server tidak valid');
+      }
+    }
+  };
+
+  xhr.send();
+}
+
+function showLisensiResult(type, message) {
+  var box = document.getElementById('lisensiResult');
+  box.className = 'alert alert-' + type;
+  box.innerHTML = message;
+  box.style.display = 'block';
+}
+
+function getDeviceId() {
+  var id = localStorage.getItem('device_id');
+  if (!id) {
+    id = 'HG680P-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    localStorage.setItem('device_id', id);
+  }
+  return id;
+}
+
+function getNamaMasjid() {
+  return localStorage.getItem('namaMasjid') || '';
+}
+
+function upgradeLisensi() {
+
+  var kode = window._kodeLisensiAktif || '';
+
+  if (!kode) {
+    alert('Kode lisensi tidak ditemukan');
+    return;
+  }
+
+  var deviceId = getDeviceId(); // pastikan fungsi ini SUDAH ADA
+
+  var url = API_URL +
+    '?action=upgradeLisensi' +
+    '&kode=' + encodeURIComponent(kode) +
+    '&device_id=' + encodeURIComponent(deviceId);
+
+  fetch(url)
+    .then(function(res) {
+      return res.json();
+    })
+    .then(function(data) {
+
+      if (data.success) {
+        alert('Lisensi berhasil diaktifkan\nPaket: ' + data.paket);
+
+        // 🔁 pindah ke index utama (full version)
+        window.location.href = 'index-trial.html';
+
+      } else {
+        alert(data.message || 'Upgrade gagal');
+      }
+
+    })
+    .catch(function(err) {
+      console.error(err);
+      alert('Gagal menghubungi server');
+    });
 }
 
 </script>
